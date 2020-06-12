@@ -1,9 +1,8 @@
 import pandas as pd
 
-
 # 读取Excel
-distanceFile = pd.ExcelFile("./Ques1.xlsx")
-sourceFile = pd.ExcelFile("附件1：仓库数据.xlsx")
+distanceFile = pd.ExcelFile("../P1/Ques1.xlsx")
+sourceFile = pd.ExcelFile("../题目/附件1：仓库数据.xlsx")
 distanceData = pd.read_excel(distanceFile)  # 距离数据
 ReviewStation = pd.read_excel(sourceFile, "复核台")
 taskLists = pd.read_excel(sourceFile, "任务单")  # 任务单

@@ -18,7 +18,7 @@ def Manhattan(x1, y1, x2, y2):
     # 计算曼哈顿距离
     return abs(int(x1) - int(x2)) + abs(int(y1) - int(y2))
 
-RepoFile = pd.ExcelFile("附件1：仓库数据.xlsx")
+RepoFile = pd.ExcelFile("../题目/附件1：仓库数据.xlsx")
 Shelf = pd.read_excel(RepoFile, "货架")
 CargoContainer = pd.read_excel(RepoFile, "货格")
 ReviewStation = pd.read_excel(RepoFile, "复核台")

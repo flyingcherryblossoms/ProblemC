@@ -1,78 +1,119 @@
 import random
+import openpyxl
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-# 读取Excel
-sourceFile = pd.ExcelFile("附件1：仓库数据.xlsx")
-CargoContainer = pd.read_excel(sourceFile, "货格")
-taskLists = pd.read_excel(sourceFile, "任务单")  # 任务单
-distanceP2 = pd.ExcelFile("./P2_distance.xlsx")
-
-taskList = []  # 任务单T0001
-for i in range(23):
-    taskList.append(list(taskLists.iloc[i]))
-    taskList[i].append((int(taskList[i][2][-5:-2]) - 1) * 15 + int(taskList[i][2][-2:]))
-    # print(i+1, taskList[i])
-
-taskCondition = []  # 货格和FH10的位置
-for i in range(len(taskList)):
-    for j in range(len(CargoContainer)):
-        if taskList[i][2] == list(CargoContainer.iloc[j])[0]:
-            taskCondition.append([int(list(CargoContainer.iloc[j])[1]), int(list(CargoContainer.iloc[j])[2])])
-taskCondition.append([0, 8000])
-taskCondition = np.array(taskCondition)
-# print(taskCondition)
-
-DistanceAll = []  # 任务单每个货格到其它任务单货格的距离和所有复核台的距离
-distanceP2Data = pd.read_excel(distanceP2)
-for i in range(len(distanceP2Data)):
-    DistanceAll.append(list(distanceP2Data.iloc[i]))
-    # print(len(Distance[i]), Distance[i])
-
-# 距离矩阵
-Distance = np.zeros([24, 24])
-for i in range(24):
-    for j in range(24):
-        Distance[i][j] = DistanceAll[i][j]
-# for i in range(len(Distance)):
-#     print(len(Distance), Distance[i])
-
-# taskName = []   # 任务点编号
+# # 读取Excel
+# sourceFile = pd.ExcelFile("../题目/附件1：仓库数据.xlsx")
+# CargoContainer = pd.read_excel(sourceFile, "货格")
+# taskLists = pd.read_excel(sourceFile, "任务单")  # 任务单
+# ReviewStation = pd.read_excel(sourceFile, "复核台")  # 复核台
+# distanceP2 = pd.ExcelFile("./P2_distance.xlsx")
+#
+# # 任务单T0001
+# taskList = []
+# for i in range(23):
+#     taskList.append(list(taskLists.iloc[i]))
+#     taskList[i].append((int(taskList[i][2][-5:-2]) - 1) * 15 + int(taskList[i][2][-2:]))
+# for i in range(1, 14):
+#     if i < 10:
+#         taskList.append(['T0001', '', 'FH0' + str(i), 0, 3000 + i])
+#     else:
+#         taskList.append(['T0001', '', 'FH' + str(i), 0, 3000 + i])
+# # for i in range(len(taskList)):
+# #     print(i + 1, taskList[i])
+#
+# # 任务点编号
+# taskName = []
 # for i in range(len(taskList)):
 #     taskName.append(taskList[i][2])
-# taskName.append("FH10")
-# print(len(taskName), taskName)
-taskName = ['S08502', 'S13509', 'S14908', 'S12608', 'S10115', 'S07515', 'S15911', 'S07305', 'S13809', 'S13812', 'S13004', 'S14510', 'S11106', 'S07212', 'S00107', 'S10501', 'S06213', 'S11205', 'S10508', 'S01713', 'S01308', 'S12103', 'S14401', 'FH10']
+# # print(len(taskName), taskName)
+#
+# # 货格和复核台的位置
+# taskPoints = []
+# for i in range(23):
+#     for j in range(len(CargoContainer)):
+#         if taskList[i][2] == list(CargoContainer.iloc[j])[0]:
+#             taskPoints.append([int(list(CargoContainer.iloc[j])[1]), int(list(CargoContainer.iloc[j])[2])])
+# for i in range(len(ReviewStation)):
+#     taskPoints.append([int(list(ReviewStation.iloc[i])[1]), int(list(ReviewStation.iloc[i])[2])])
+# taskPoints = np.array(taskPoints)
+#
+# # 任务单每个货格到其它任务单货格的距离和所有复核台的距离
+# DistanceAll = []
+# distanceP2Data = pd.read_excel(distanceP2)
+# for i in range(len(distanceP2Data)):
+#     DistanceAll.append(list(distanceP2Data.iloc[i]))
+#     # print(len(Distance[i]), Distance[i])
+
+def readExcel():
+    # 读取Excel
+    sourceFile = pd.ExcelFile("../题目/附件1：仓库数据.xlsx")
+    CargoContainer = pd.read_excel(sourceFile, "货格")
+    taskLists = pd.read_excel(sourceFile, "任务单")  # 任务单
+    ReviewStation = pd.read_excel(sourceFile, "复核台")  # 复核台
+    distanceP2 = pd.ExcelFile("./P2_distance.xlsx")
+
+    # 任务单T0001
+    taskList = []
+    for i in range(23):
+        taskList.append(list(taskLists.iloc[i]))
+        taskList[i].append((int(taskList[i][2][-5:-2]) - 1) * 15 + int(taskList[i][2][-2:]))
+    for i in range(1, 14):
+        if i < 10:
+            taskList.append(['T0001', '', 'FH0' + str(i), 0, 3000 + i])
+        else:
+            taskList.append(['T0001', '', 'FH' + str(i), 0, 3000 + i])
+
+    # 货格和复核台的位置
+    taskPoint = []
+    for i in range(23):
+        for j in range(len(CargoContainer)):
+            if taskList[i][2] == list(CargoContainer.iloc[j])[0]:
+                taskPoint.append([int(list(CargoContainer.iloc[j])[1]), int(list(CargoContainer.iloc[j])[2])])
+    for i in range(len(ReviewStation)):
+        taskPoint.append([int(list(ReviewStation.iloc[i])[1]), int(list(ReviewStation.iloc[i])[2])])
+    taskPoint = np.array(taskPoint)
+
+    # 任务单每个货格到其它任务单货格的距离和所有复核台的距离
+    Distance = []
+    distanceP2Data = pd.read_excel(distanceP2)
+    for i in range(len(distanceP2Data)):
+        Distance.append(list(distanceP2Data.iloc[i]))
+        # print(len(Distance[i]), Distance[i])
+    return taskList, taskPoint, Distance
+
+
+taskList, taskPoints, DistanceAll = readExcel()
 
 # 种群数
 count = 100
 # 改良次数
-improve_count = 10000
+improve_count = 1000
 # 进化次数
-itter_time = 3000
+itter_time = 500
 # 设置强者的定义概率，即种群前30%为强者
 retain_rate = 0.3
 # 设置弱者的存活概率
-random_select_rate = 0
+random_select_rate = 0.5
 # 变异率
 mutation_rate = 0.1
 # 设置起点
-origin = 23  # 起点FH01
-index = [i for i in range(len(taskName))]
+origin = 32  # 起点FH10
+index = [i for i in range(24)]
 index.remove(23)
 
 
 # 总距离
 def get_total_distance(x):
     distance = 0
-    distance += Distance[origin][x[0]]
+    distance += DistanceAll[origin][x[0]]
     for i in range(len(x)):
         if i == len(x) - 1:
-            distance += Distance[origin][x[i]]
+            distance += DistanceAll[origin][x[i]]
         else:
-            distance += Distance[x[i]][x[i + 1]]
+            distance += DistanceAll[x[i]][x[i + 1]]
     return distance
 
 
@@ -175,6 +216,7 @@ def mutation(children):
             w = random.randint(v + 1, len(child) - 2)
             child = children[i]
             child = child[0:u] + child[v:w] + child[u:v] + child[w:]
+    return children
 
 
 # 得到最佳纯输出结果
@@ -184,94 +226,131 @@ def get_result(population):
     return graded[0][0], graded[0][1]
 
 
-def draw(Path, register):
+# 总距离
+def get_distance(x):
+    distance = 0
+    for k in range(len(x) - 1):
+        distance += DistanceAll[x[k]][x[k + 1]]
+    return distance
+
+
+def draw(Path, minRegister):
     X = []
     Y = []
-    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+    # plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
     plt.rcParams.update({'font.size': 8})
     for index in Path:
-        x = taskCondition[index, 0]
-        y = taskCondition[index, 1]
+        x = taskPoints[index, 0]
+        y = taskPoints[index, 1]
         X.append(x)
         Y.append(y)
-        plt.annotate(taskName[index], xy=(x, y),
-                     xytext=(x+600, y))
+        plt.annotate(taskList[index][2], xy=(x, y), xytext=(x + 600, y))
     plt.plot(X, Y, '-o')
     plt.show()
-    # plt.plot(list(range(len(register))), register)
-    # plt.show()
+    plt.plot(list(range(len(minRegister))), minRegister)
+    plt.show()
 
 
-# minPath = []  # 最短路径
-# minDistance = 9999999999    # 最短路径长度
-# minRegister = []    # 最短的那次的迭代过程的路径变化
-# # 多次计算，取最短的一次
-# for times in range(10):
-#     # 使用改良圈算法初始化种群
-#     population = []
-#     for i in range(count):
-#         # 随机生成个体
-#         x = index.copy()
-#         random.shuffle(x)
-#         x = improve(x)
-#         population.append(x)
-#
-#     register = []   # 记录遗传过程的每一组序列的总长度变化
-#     i = 0
-#     distance, result_path = get_result(population)
-#     while i < itter_time:
-#         # 选择繁殖个体群
-#         parents = selection(population)
-#         # 交叉繁殖
-#         children = crossover(parents)
-#         # 变异操作
-#         mutation(children)
-#         # 更新种群
-#         population = parents + children
-#
-#         distance, result_path = get_result(population)
-#         register.append(distance)
-#         i = i + 1
-#
-#     print(distance)
-#     print(result_path)
-#
-#     result_path = [origin] + result_path + [origin]
-#     draw(result_path, register)
-#
-#     if minDistance > distance:
-#         minDistance = distance
-#         minPath = result_path
-#         minRegister = register
-#
-# print("\n最短路径距离：", minDistance)
-# print("最短路径：", len(minPath), minPath)
-# draw(minPath, minRegister)
-# minPath = []
-minPaths = []
-# minPath.append([7, 18, 15, 21, 10, 8, 11, 9, 2, 22, 6, 1, 3, 17, 12, 4, 13, 16, 0, 5, 20, 19, 14])
-# minPath.append([7, 15, 18, 21, 10, 8, 11, 9, 2, 22, 6, 1, 3, 17, 12, 4, 13, 16, 0, 5, 20, 19, 14])
-# minPath.append([7, 18, 15, 21, 10, 8, 11, 9, 2, 22, 6, 1, 3, 17, 12, 4, 13, 16, 5, 0, 20, 19, 14])
-# minPath.append([7, 15, 18, 21, 10, 8, 11, 9, 2, 22, 6, 1, 3, 17, 12, 4, 13, 16, 5, 0, 20, 19, 14])
-minPaths.append([23, 7, 18, 15, 21, 10, 8, 11, 9, 2, 22, 6, 1, 3, 17, 12, 4, 13, 16, 0, 5, 20, 19, 14, 23])
-minPaths.append([23, 7, 15, 18, 21, 10, 8, 11, 9, 2, 22, 6, 1, 3, 17, 12, 4, 13, 16, 0, 5, 20, 19, 14, 23])
-minPaths.append([23, 7, 18, 15, 21, 10, 8, 11, 9, 2, 22, 6, 1, 3, 17, 12, 4, 13, 16, 5, 0, 20, 19, 14, 23])
-minPaths.append([23, 7, 15, 18, 21, 10, 8, 11, 9, 2, 22, 6, 1, 3, 17, 12, 4, 13, 16, 5, 0, 20, 19, 14, 23])
-minDistance = 9999999
-for j in range(len(minPaths)):
-    minDistance = get_total_distance(minPaths[j])
-    print("\n最短路径距离：", minDistance)
-    print("最短路径：", len(minPaths[j]), minPaths[j])
-    draw(minPaths[j], minPaths[j])
-    ccPath = []
-    for i in range(len(minPaths[j])):
-        ccPath.append(taskName[minPaths[j][i]])
-    print(ccPath)
+minPath = []  # 最短路径
+minDistance = 9999999999  # 最短路径长度
+minRegister = []  # 最短的那次的迭代过程的路径变化
+# 多次计算，取最短的一次
+for times in range(5):
+    # 使用改良圈算法初始化种群
+    population = []
+    for i in range(count):
+        # 随机生成个体
+        x = index.copy()
+        random.shuffle(x)
+        x = improve(x)
+        population.append(x)
+
+    register = []  # 记录遗传过程的每一组序列的总长度变化
+    i = 0
+    distance, result_path = get_result(population)
+    while i < itter_time:
+        # 选择繁殖个体群
+        parents = selection(population)
+        # 交叉繁殖
+        children = crossover(parents)
+        # 变异操作
+        children = mutation(children)
+        # 更新种群
+        population = parents + children
+
+        distance, result_path = get_result(population)
+        register.append(distance)
+        i = i + 1
+
+    print("当前路径：", distance, result_path)
+
+    result_path = [origin] + result_path + [origin]
+    draw(result_path, register)
+
+    if minDistance > distance:
+        minDistance = distance
+        minPath = result_path
+        minRegister = register
+
+    tempPath = minPath.copy()  # 算出的最小回路
+    tempPathReverse = minPath.copy()  # 首尾倒置的最小回路
+    tempPathReverse.reverse()
+    for i in range(13):  # 去掉最后一个点（终点，或者起点，因为是同一个点，所以要倒过来算一次），环取最短路径，一共13个复核台，26种情况
+        ccPath = []  # 记录货格名称
+        tempPath.pop()  # 去尾
+        tempPath.append(i + 23)  # 加复核台
+        tempPathReverse.pop()  # 去尾
+        tempPathReverse.append(i + 23)  # 加复核台
+        pathlenth1 = get_distance(tempPath)
+        pathlenth2 = get_distance(tempPathReverse)
+        print(pathlenth1, pathlenth2, 'FH', i + 1)
+        if pathlenth1 < pathlenth2:
+            if minDistance > pathlenth1:
+                minDistance = pathlenth1
+                minPath = tempPath.copy()
+                print("当前minDistance", minDistance, "当前minPath：", minPath)
+        else:
+            if minDistance > pathlenth2:
+                minDistance = pathlenth2
+                minPath = tempPathReverse.copy()
+                print("当前minDistance", minDistance, "当前minPath：", minPath)
+        # print(tempPath)
+        # print(tempPathReverse)
+        # for j in range(len(minPath)):
+        #     ccPath.append(taskList[minPath[j]][2])
+        # print(ccPath)  # 输出最短路径的货格代码
+
+
+draw(minPath, minRegister)
+print("\n最短距离：", minDistance)
+print("最短路径：", len(minPath), minPath)
+ccPath = []
+outputData = [["序号", "元素原始名称", "元素序号(1-3013)", "商品件数"]]  # 输出到表格的内容
+for i in range(len(minPath)):
+    ccPath.append(taskList[minPath[i]][2])
+    outputData.append([i + 1, taskList[minPath[i]][2], taskList[minPath[i]][4], taskList[minPath[i]][3]])
+print(ccPath)
+# for i in range(len(outputData)):
+#     print(outputData[i])
+
+
+# 写入Excel
+writer = pd.ExcelWriter("Ques2_.xlsx", engine='openpyxl')
+book = openpyxl.load_workbook(writer.path)
+writer.book = book
+# 清除原来的数据
+idx = book.sheetnames.index('Ques2')
+book.remove(book.worksheets[idx])
+# book.create_sheet('Ques2', idx)
+# 写入新的数据
+pd.DataFrame(outputData).to_excel(excel_writer=writer, sheet_name='Ques2', index=None, header=False)
+writer.save()
+writer.close()
 
 
 # 计算花费的时间
-# 时间包括复核台
-Total_Time = float(minDistance)/1500  #初始值为走完全程的
+# 时间包括复核台复核打包时间，路程上的时间，取货的时间
+Total_Time = float(minDistance)/1500  #初始值为走完全程的时间
 for i in range(len(taskList)):
     amount = taskList[i][3]
     time = 0
@@ -280,5 +359,5 @@ for i in range(len(taskList)):
     else:
         time = 5 * amount
     Total_Time += time
-
+Total_Time += 30    # 复核台复核打包时间
 print("花费总时间：", Total_Time, "s")
