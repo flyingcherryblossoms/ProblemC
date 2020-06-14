@@ -1,3 +1,4 @@
+import os
 import openpyxl
 import pandas as pd
 import numpy as np
@@ -5,8 +6,11 @@ from GATSP import GATSP
 
 
 def writeToExcel(fileName, outputData):
+    filename = fileName + '.xlsx'
+    if not os.path.exists(filename):
+        pd.DataFrame().to_excel(filename)
     # 写入Excel
-    writer = pd.ExcelWriter(fileName+'.xlsx', engine='openpyxl')
+    writer = pd.ExcelWriter(filename, engine='openpyxl')
     book = openpyxl.load_workbook(writer.path)
     writer.book = book
     # 清除原来的数据
@@ -103,7 +107,7 @@ GA = GATSP(point_count=point_count, pop_count=pop_count, improve_count=improve_c
            retain_rate=retain_rate, random_select_rate=random_select_rate, mutation_rate=mutation_rate,
            origin=origin, index=index, taskList=taskList, taskPoint=taskPoint, Distance=Distance)
 RS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]     # 复核台：0表示第一个，后面依此类推
-minDistance, minPath, ccPath, minRegister = GA.run(100, RS)
+minDistance, minPath, ccPath, minRegister = GA.run(5, RS)
 GA.draw(minPath, minRegister)
 
 

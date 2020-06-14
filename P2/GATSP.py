@@ -162,7 +162,7 @@ class GATSP:
         return distance
 
     # 绘图
-    def draw(self, Path, Register):
+    def draw(self, Path, Register=None):
         X = []
         Y = []
         # plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
@@ -175,11 +175,12 @@ class GATSP:
             plt.annotate(self.taskList[i][2], xy=(x, y), xytext=(x + 600, y))
         plt.plot(X, Y, '-o')
         plt.show()
-        plt.plot(list(range(len(Register))), Register)
-        plt.show()
+        if Register is not None:
+            plt.plot(list(range(len(Register))), Register)
+            plt.show()
 
     # 运行
-    def run(self, times=0, RS=None):
+    def run(self, times=1, RS=None):
         self.minDistance = 99999999999
         for timei in range(times):
             # 使用改良圈算法初始化种群
@@ -212,11 +213,14 @@ class GATSP:
 
             result_path = [self.origin] + result_path + [self.origin]
             self.draw(result_path, register)
-
+            ccPath = []  # 记录货格名称
             if self.minDistance > distance:
                 self.minDistance = distance
                 self.minPath = result_path
                 self.minRegister = register
+                for j in range(len(self.minPath)):
+                    ccPath.append(self.taskList[self.minPath[j]][2])
+                self.ccPath = ccPath
 
             tempPath = self.minPath.copy()  # 算出的最小回路
             tempPathReverse = self.minPath.copy()  # 首尾倒置的最小回路
